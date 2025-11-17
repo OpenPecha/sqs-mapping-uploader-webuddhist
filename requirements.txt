@@ -1,6 +1,7 @@
 sqlalchemy==2.0.35
-dotenv==0.9.9
+python-dotenv==1.0.0
 psycopg2-binary==2.9.9
 requests==2.32.3
 pydantic==2.10.6
-aws-sqs-consumer
+boto3==1.40.74
+aws-sqs-consumer==0.0.15
