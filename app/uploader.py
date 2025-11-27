@@ -22,12 +22,13 @@ def upload_all_segments_mapping_to_webuddhist(manifestation_id: str):
         mapping = _prepare_webuddhist_mapping_payload(
             relations=relations
         )
-        if mapping.get("text_mappings", None) is not None and len(mapping["text_mappings"]) <= 0:
-            return
-        response = _upload_mapping_to_webuddhist(
-            mapping=mapping
-        )
-        return response
+        # if mapping.get("text_mappings", None) is not None and len(mapping["text_mappings"]) <= 0:
+        #     return
+        # response = _upload_mapping_to_webuddhist(
+        #     mapping=mapping
+        # )
+        # return response
+        return "done"
     except Exception as e:
         raise e
 
@@ -70,6 +71,9 @@ def _prepare_webuddhist_mapping_payload(relations):
             "text_mappings": []
         }
         for relation in relations.segments:
+            payload = {
+                "text_mappings": []
+            }
             text_mapping = {
                 "text_id": relations.manifestation_id,
                 "segment_id": relation.segment_id,
@@ -88,6 +92,12 @@ def _prepare_webuddhist_mapping_payload(relations):
             if len(text_mapping["mappings"]) == 0:
                 continue
             payload["text_mappings"].append(text_mapping)
+            if payload.get("text_mappings", None) is not None and len(payload["text_mappings"]) <= 0:
+                continue
+            response = _upload_mapping_to_webuddhist(
+                mapping=payload
+            )
+            logger.info(f"Response from Webuddhist: {response}")
         return payload
     except Exception as e:
         raise e
