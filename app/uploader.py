@@ -54,7 +54,7 @@ def _upload_mapping_to_webuddhist(mapping):
         # logger.info(f"Response from Webuddhist: {response.text}")
         
         if response.status_code == 404:
-            logger.error(f"Endpoint not found. Check if '{we_buddhist_url}/mappings' is the correct endpoint")
+            logger.error(response)
             raise Exception(response)
         
         if response.status_code not in [200, 201]:
