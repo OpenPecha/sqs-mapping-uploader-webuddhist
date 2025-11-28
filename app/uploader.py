@@ -137,7 +137,7 @@ def _format_all_text_segment_relation_mapping(manifestation_id: str, all_text_se
             "created_at": task.created_at.isoformat() if task.created_at else None,
             "updated_at": task.updated_at.isoformat() if task.updated_at else None
         }
-        logger.info(f"Starting with formatting task: {task_dict}")
+        # logger.info(f"Starting with formatting task: {task_dict}")
         segment = SegmentsRelation(
             segment_id = task.segment_id,
             mappings = []
