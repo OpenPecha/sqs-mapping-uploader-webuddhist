@@ -40,7 +40,7 @@ def _upload_mapping_to_webuddhist(mapping):
             "Authorization": f"Bearer {token}"
         }
         logger.info(f"Uploading mapping to Webuddhist")
-        logger.info(f"Mapping payload: {mapping}")
+        # logger.info(f"Mapping payload: {mapping}")
         
         response = requests.post(
             f"{we_buddhist_url}/mappings", 
@@ -49,8 +49,9 @@ def _upload_mapping_to_webuddhist(mapping):
             timeout=600  # 10 minutes timeout - WeBuddhist on Render can be very slow
         )
         sleep(5)
-        logger.info(f"Upload response status: {response.status_code}")
-        logger.info(f"Response from Webuddhist: {response.text}")
+        logger.info("Uploaded mapping to webuddhist")
+        # logger.info(f"Upload response status: {response.status_code}")
+        # logger.info(f"Response from Webuddhist: {response.text}")
         
         if response.status_code == 404:
             logger.error(f"Endpoint not found. Check if '{we_buddhist_url}/mappings' is the correct endpoint")
@@ -97,7 +98,7 @@ def _prepare_webuddhist_mapping_payload(relations):
             response = _upload_mapping_to_webuddhist(
                 mapping=payload
             )
-            logger.info(f"Response from Webuddhist: {response}")
+            # logger.info(f"Response from Webuddhist: {response}")
         return payload
     except Exception as e:
         raise e
@@ -147,9 +148,9 @@ def _format_all_text_segment_relation_mapping(manifestation_id: str, all_text_se
                 segments = mapping["segments"]
             )
             segment.mappings.append(mapping_dict)
-        logger.info(f"Segment: {segment}")
+        # logger.info(f"Segment: {segment}")
         response.segments.append(segment)
-    logger.info(f"Response: {response}")
+    # logger.info(f"Response: {response}")
     return response
 
 def get_token()->str:
