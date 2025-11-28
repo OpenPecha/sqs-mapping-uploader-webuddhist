@@ -55,7 +55,7 @@ def _upload_mapping_to_webuddhist(mapping):
         
         if response.status_code == 404:
             logger.error(f"Endpoint not found. Check if '{we_buddhist_url}/mappings' is the correct endpoint")
-            raise Exception(f"WeBuddhist API endpoint not found: {we_buddhist_url}/mappings")
+            raise Exception(response)
         
         if response.status_code not in [200, 201]:
             logger.error(f"Upload failed with status {response.status_code}")
