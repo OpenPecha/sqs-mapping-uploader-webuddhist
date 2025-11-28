@@ -55,7 +55,6 @@ def _upload_mapping_to_webuddhist(mapping):
         
         if response.status_code == 404:
             logger.error(response)
-            raise Exception(response)
         
         if response.status_code not in [200, 201]:
             logger.error(f"Upload failed with status {response.status_code}")
