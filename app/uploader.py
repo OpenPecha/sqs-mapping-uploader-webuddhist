@@ -12,25 +12,27 @@ from time import sleep
 
 logger = logging.getLogger(__name__)
 
-def upload_all_segments_mapping_to_webuddhist(manifestation_id: str):
+
+def upload_all_segments_mapping_to_webuddhist(text_id: str):
     try:
         logger.info("Getting all the segments relations by manifestation")
-        relations = get_all_segments_relation_by_manifestation(
-            manifestation_id=manifestation_id
+        relations = get_all_segments_by_segment_ids(
+            text_id=text_id,
+            segment_ids=segment_ids
         )
         logger.info("Preparing the webuddhist mapping payload")
         mapping = _prepare_webuddhist_mapping_payload(
             relations=relations
         )
-        # if mapping.get("text_mappings", None) is not None and len(mapping["text_mappings"]) <= 0:
-        #     return
-        # response = _upload_mapping_to_webuddhist(
-        #     mapping=mapping
-        # )
-        # return response
-        return "done"
+        if mapping.get("text_mappings", None) is not None and len(mapping["text_mappings"]) <= 0:
+            return
+        response = _upload_mapping_to_webuddhist(
+            mapping=mapping
+        )
+        return response
     except Exception as e:
         raise e
+
 
 def _upload_mapping_to_webuddhist(mapping):
     try:
@@ -64,6 +66,7 @@ def _upload_mapping_to_webuddhist(mapping):
     except Exception as e:
         raise e
 
+
 def _prepare_webuddhist_mapping_payload(relations):
     try:
 
@@ -75,14 +78,14 @@ def _prepare_webuddhist_mapping_payload(relations):
                 "text_mappings": []
             }
             text_mapping = {
-                "text_id": relations.manifestation_id,
+                "text_id": relations.text_id,
                 "segment_id": relation.segment_id,
                 "mappings": []
             }
             segment_mapping = []
             for mapped in relation.mappings:
                 segment_mapping.append({
-                    "parent_text_id": mapped.manifestation_id,
+                    "parent_text_id": mapped.text_id,
                     "segments": [
                         segment.segment_id
                         for segment in mapped.segments
@@ -102,27 +105,29 @@ def _prepare_webuddhist_mapping_payload(relations):
     except Exception as e:
         raise e
 
-def get_all_segments_relation_by_manifestation(manifestation_id: str):
+
+def get_all_segments_by_segment_ids(text_id: str, segment_ids: list[str]):
+    """
+    Get all the segments by segment ids
+    """
     try:
         with SessionLocal() as session:
-            root_job = session.query(RootJob).filter(RootJob.manifestation_id == manifestation_id).first()
-            if root_job.completed_segments < root_job.total_segments:
-                raise Exception("Job not completed")
-            
-            all_text_segment_relations = session.query(SegmentTask).filter(SegmentTask.job_id == root_job.job_id).all()
-
-            response = _format_all_text_segment_relation_mapping(
-                manifestation_id = manifestation_id,
-                all_text_segment_relations = all_text_segment_relations
-            )
-            return response
+            segments = session.query(SegmentTask).filter(
+                SegmentTask.text_id == text_id,
+                SegmentTask.segment_id.in_(segment_ids)
+            ).all()
+            return segments
     except Exception as e:
         raise e
 
-def _format_all_text_segment_relation_mapping(manifestation_id: str, all_text_segment_relations):
+
+def _format_all_text_segment_relation_mapping(text_id: str, all_text_segment_relations):
+    """
+    Format all the text segment relation mapping
+    """
     response = AllTextSegmentRelationMapping(
-        manifestation_id = manifestation_id,
-        segments = []
+        text_id=text_id,
+        segments=[]
     )
     for task in all_text_segment_relations:
         task_dict = {
@@ -138,13 +143,13 @@ def _format_all_text_segment_relation_mapping(manifestation_id: str, all_text_se
         }
         # logger.info(f"Starting with formatting task: {task_dict}")
         segment = SegmentsRelation(
-            segment_id = task.segment_id,
-            mappings = []
+            segment_id=task.segment_id,
+            mappings=[]
         )
         for mapping in task_dict["result_json"]:
             mapping_dict = Mapping(
-                manifestation_id = mapping["manifestation_id"],
-                segments = mapping["segments"]
+                text_id=mapping["text_id"],
+                segments=mapping["segments"]
             )
             segment.mappings.append(mapping_dict)
         # logger.info(f"Segment: {segment}")
@@ -152,7 +157,11 @@ def _format_all_text_segment_relation_mapping(manifestation_id: str, all_text_se
     # logger.info(f"Response: {response}")
     return response
 
+
 def get_token()->str:
+    """
+    Get token from Webuddhist
+    """
     try:
         logger.info("Getting token from Webuddhist")
         email = get("WEBUDDHIST_LOG_IN_EMAIL")
@@ -180,11 +189,3 @@ def get_token()->str:
         return token
     except Exception as e:
         raise e
-
-if __name__ == "__main__":
-    manifestation_id = input("Enter the manifestation id: ")
-
-    mapping_payload = upload_all_segments_mapping_to_webuddhist(
-        manifestation_id = manifestation_id
-    )
-    print("mapping_payload has been written to mapping_payload.json")
