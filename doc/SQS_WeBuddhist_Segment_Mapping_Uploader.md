@@ -115,16 +115,3 @@ This service acts as the integration layer between internal processing results a
 - Python version is specified in `runtime.txt` (e.g. 3.12). Environment variables are loaded from a `.env` file in the project root via `python-dotenv` in [app/config.py](../app/config.py).
 
 ---
-
-## Documentation checklist
-
-| # | Task | Status |
-|---|------|--------|
-| 1 | Service overview — role in pipeline and final delivery responsibility | Done (Section 1) |
-| 2 | SQS consumption flow — reading queue #2 messages and extracting required fields | Done (Section 2) |
-| 3 | Database retrieval — fetching SegmentMapping records using text_id and segment_ids | Done (Section 3) |
-| 4 | Payload transformation — formatting DB records into WeBuddhist text_mappings payload | Done (Section 4) |
-| 5 | Authentication & upload flow — login, token handling, /mappings upload process | Done (Section 5) |
-| 6 | API request behavior — timeouts, response handling, and logging | Done (Section 6) |
-| 7 | Reliability concerns — retries, duplicate delivery/idempotency, downstream API failures | Done (Section 7) |
-| 8 | Configuration & libraries — env vars, API/DB settings, dependencies used | Done (Section 8) |
