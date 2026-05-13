@@ -38,7 +38,6 @@ def upload_all_segments_mapping_to_webuddhist(
             relations=formatted_relations,
             text_id=text_id
         )
-        logger.info(f"Mapping: {mapping}")
         if mapping.get("text_mappings", None) is not None and len(mapping["text_mappings"]) <= 0:
             return
 
@@ -53,7 +52,7 @@ def upload_all_segments_mapping_to_webuddhist(
 
 
 def _upload_mapping_to_webuddhist(mapping, destination_environment: str):
-    logger.info(f"Mapping>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: {mapping}")
+    logger.info(f"Mapping>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: {mapping}\n\n")
     try:
         token = get_token(destination_environment=destination_environment)
 
