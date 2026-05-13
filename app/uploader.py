@@ -53,7 +53,7 @@ def upload_all_segments_mapping_to_webuddhist(
 
 
 def _upload_mapping_to_webuddhist(mapping, destination_environment: str):
-    print(f"Mapping>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: {mapping}")
+    logger.info(f"Mapping>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>: {mapping}")
     try:
         token = get_token(destination_environment=destination_environment)
 
