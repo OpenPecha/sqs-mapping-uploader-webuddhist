@@ -19,6 +19,8 @@ def upload_all_segments_mapping_to_webuddhist(
     segment_ids: list[str],
     destination_environment: str
 ):
+    if text_id == 'kArfsS3PWvd8Gi6y423lq':
+        return
     try:
         logger.info(f"Total number of segment ids: {len(segment_ids)}")
         logger.info("Getting all the segments relations by manifestation")
