@@ -3,7 +3,7 @@ import requests
 from app.config import get
 import logging
 from time import sleep
-from app.db.models import SegmentMapping
+from app.db.models import RootJob, SegmentMapping
 from app.db.postgres import SessionLocal
 from app.models import (
     AllTextSegmentRelationMapping,
@@ -22,6 +22,13 @@ def upload_all_segments_mapping_to_webuddhist(
     if text_id == 'kArfsS3PWvd8Gi6y423lq':
         return
     try:
+        if not _is_root_job_completed(text_id=text_id, segment_ids=segment_ids):
+            logger.warning(
+                f"Root job for text_id={text_id} is not COMPLETED yet "
+                f"(completed_segments < total_segments). Skipping upload."
+            )
+            return
+
         logger.info(f"Total number of segment ids: {len(segment_ids)}")
         logger.info("Getting all the segments relations by manifestation")
         relations = get_all_segments_by_segment_ids(
@@ -128,6 +135,42 @@ def _prepare_webuddhist_mapping_payload(relations, text_id: str):
         raise e
 
 
+def _is_root_job_completed(text_id: str, segment_ids: list[str]) -> bool:
+    """
+    Returns True only when the root job for this text_id has
+    completed_segments == total_segments (i.e. status COMPLETED).
+    Resolves the root_job_id via the first matching SegmentMapping row.
+    """
+    with SessionLocal() as session:
+        sample = (
+            session.query(SegmentMapping)
+            .filter(
+                SegmentMapping.text_id == text_id,
+                SegmentMapping.segment_id.in_(segment_ids),
+            )
+            .first()
+        )
+        if sample is None:
+            logger.warning(f"No segment_mapping rows found for text_id={text_id}")
+            return False
+
+        root_job = (
+            session.query(RootJob)
+            .filter(RootJob.job_id == sample.root_job_id)
+            .first()
+        )
+        if root_job is None:
+            logger.warning(f"No root_job found for root_job_id={sample.root_job_id}")
+            return False
+
+        logger.info(
+            f"root_job {root_job.job_id}: "
+            f"completed={root_job.completed_segments}/{root_job.total_segments} "
+            f"status={root_job.status}"
+        )
+        return root_job.completed_segments == root_job.total_segments
+
+
 def get_all_segments_by_segment_ids(text_id: str, segment_ids: list[str]):
     with SessionLocal() as session:
         segments = (
@@ -169,6 +212,11 @@ def _format_all_text_segment_relation_mapping(
             segment_id=task.segment_id,
             mappings=[]
         )
+        if task_dict['result_json'] is None:
+            logger.warning(
+                f"segment_id={task.segment_id} has null result_json, skipping."
+            )
+            continue
         for mapping in task_dict['result_json']:
             mapping_dict = Mapping(
                 text_id=mapping['manifestation_id'],
