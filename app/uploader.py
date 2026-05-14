@@ -19,15 +19,16 @@ def upload_all_segments_mapping_to_webuddhist(
     segment_ids: list[str],
     destination_environment: str
 ):
-    if text_id == 'kArfsS3PWvd8Gi6y423lq':
+    text_ids = ['kArfsS3PWvd8Gi6y423lq', 'yLHHHrKUht6TkekF3t6ea', 'rs02tl3E89TH6VKVhI8bB']
+    if text_id in text_ids:
         return
     try:
-        if not _is_root_job_completed(text_id=text_id, segment_ids=segment_ids):
-            logger.warning(
-                f"Root job for text_id={text_id} is not COMPLETED yet "
-                f"(completed_segments < total_segments). Skipping upload."
-            )
-            return
+        # if not _is_root_job_completed(text_id=text_id, segment_ids=segment_ids):
+        #     logger.warning(
+        #         f"Root job for text_id={text_id} is not COMPLETED yet "
+        #         f"(completed_segments < total_segments). Skipping upload."
+        #     )
+        #     return
 
         logger.info(f"Total number of segment ids: {len(segment_ids)}")
         logger.info("Getting all the segments relations by manifestation")
